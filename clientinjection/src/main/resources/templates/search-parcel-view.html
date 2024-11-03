@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parcel Information</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h2>Parcel Information</h2>
+
+<div>
+    <form method="POST" action="/search-parcel">
+        <label for="parcelTrackingNo">ParcelTrackingNo</label>
+        <input type="text" id="parcelTrackingNo" name="parcelTrackingNo" >
+        <input type="submit" value="Submit">
+    </form>
+</div>
+
+<br>
+<br>
+
+<table>
+    <tr>
+        <th>Parcel Tracking No</th>
+        <th>Sender Name</th>
+        <th>Sender Address</th>
+        <th>Sender Phone</th>
+        <th>Receiver Name</th>
+        <th>Receiver Address</th>
+        <th>Receiver Phone</th>
+        <th>Parcel Description</th>
+    </tr>
+
+    <tr th:each="parcel : ${parcels}" >
+        <td th:text="${parcel.parcelTrackingNo}"></td>
+        <td th:text="${parcel.senderName}"></td>
+        <td th:text="${parcel.senderAddress}"></td>
+        <td th:text="${parcel.senderMobileNo}"></td>
+        <td th:text="${parcel.receiverName}"></td>
+        <td th:text="${parcel.receiverAddress}"></td>
+        <td th:text="${parcel.receiverMobileNo}"></td>
+        <td th:text="${parcel.parcelDescription}"></td>
+    </tr>
+</table>
+</body>
+</html>
