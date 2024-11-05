@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Optional;
@@ -43,6 +44,37 @@ public class LoginController {
             }
         }
 
+    }
+
+    @PostMapping("/login-route/{routeTo}")
+    public String loginAndRoute(
+            @PathVariable String routeTo,
+            @ModelAttribute LoginControllerDto.LoginRequest request, HttpServletResponse response
+    ) {
+        return loginAndReturn(request, routeTo, response);
+    }
+
+    public String loginAndReturn(LoginControllerDto.LoginRequest request, String routeTo, HttpServletResponse response) {
+
+
+        Optional<UserInfo> userInfoOptional  = userInfoRepository.findOneByUsername(request.getUsername());
+
+        if (userInfoOptional.isEmpty()) {
+            log.info("Case not found username");
+            return "error.html";
+        } else {
+            if ( userInfoOptional.get().getPassword().equals(request.getPassword()) ) {
+
+                Cookie usernameCookie = new Cookie("username", userInfoOptional.get().getUsername());
+                Cookie companyIdCookie = new Cookie("companyId", userInfoOptional.get().getCompanyId());
+
+                response.addCookie(usernameCookie);
+                response.addCookie(companyIdCookie);
+                return routeTo;
+            } else {
+                return "error.html";
+            }
+        }
     }
 
 }

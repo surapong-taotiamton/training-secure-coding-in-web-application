@@ -17,5 +17,10 @@ public class CompanyInfo {
 
     private String companyName;
 
+    private String companyTaxId;
+
+    private String companyAddress;
+
+    private Long countUseParcel;
 
 }
