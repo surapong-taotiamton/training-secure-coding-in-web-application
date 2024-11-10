@@ -56,6 +56,7 @@ public class LoginController {
 
     public String loginAndReturn(LoginControllerDto.LoginRequest request, String routeTo, HttpServletResponse response) {
 
+        log.info("routeTo : {}", routeTo);
 
         Optional<UserInfo> userInfoOptional  = userInfoRepository.findOneByUsername(request.getUsername());
 

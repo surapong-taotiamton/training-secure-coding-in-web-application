@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta name="base-path" content="${pageContext.request.contextPath}">
+    <meta charset="UTF-8">
+    <title>ระบบค้นหาพัสดุ</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #searchInput {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        #searchBtn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #searchBtn:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 style="text-align: center;">ระบบค้นหาข้อมูลพัสดุ</h1>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="กรอกหมายเลขพัสดุ">
+        <button id="searchBtn">ค้นหา</button>
+    </div>
+
+    <div class="loading">กำลังโหลดข้อมูล...</div>
+
+    <table id="resultsTable" style="display: none;">
+        <thead>
+        <tr>
+            <th>หมายเลขพัสดุ</th>
+            <th>ผู้ส่ง</th>
+            <th>เบอร์โทรผู้ส่ง</th>
+            <th>ที่อยู่ผู้ส่ง</th>
+            <th>ผู้รับ</th>
+            <th>เบอร์โทรผู้รับ</th>
+            <th>ที่อยู่ผู้รับ</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <div id="noResults" class="no-results" style="display: none;">
+        ไม่พบข้อมูลที่ค้นหา
+    </div>
+</div>
+
+<script>
+
+
+
+
+    $(document).ready(function() {
+        // ฟังก์ชันสำหรับค้นหาข้อมูล
+        function searchParcel() {
+            const trackingNo = $('#searchInput').val().trim();
+
+            if (!trackingNo) {
+                alert('กรุณากรอกหมายเลขพัสดุ');
+                return;
+            }
+
+            // แสดง loading
+            $('.loading').show();
+            $('#resultsTable').hide();
+            $('#noResults').hide();
+
+            // จำลอง API call
+            $.ajax({
+                url: getSpringBootContextPath()  + '/search-json/parcel', // เปลี่ยนเป็น URL API จริง
+                method: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify( { parcelTrackingNo: trackingNo } ) ,
+                success: function(response) {
+                    handleSearchResults(response);
+                },
+                error: function(xhr, status, error) {
+                    alert('เกิดข้อผิดพลาดในการค้นหา: ' + error);
+                    $('.loading').hide();
+                }
+            });
+        }
+
+        function getSpringBootContextPath() {
+                return $('meta[name="_context-path"]').attr('content') || '';
+        }
+
+        // ฟังก์ชันจัดการผลลัพธ์
+        function handleSearchResults(results) {
+            $('.loading').hide();
+
+            if (!results || results.length === 0) {
+                $('#noResults').show();
+                $('#resultsTable').hide();
+                return;
+            }
+
+            const tbody = $('#resultsTable tbody');
+            tbody.empty();
+
+            results.forEach(function(item) {
+                const row = $('<tr>').append(
+                    $('<td>').text(item.parcelTrackingNo),
+                    $('<td>').text(item.senderName),
+                    $('<td>').text(item.senderMobileNo),
+                    $('<td>').text(item.senderAddress),
+                    $('<td>').text(item.receiverName),
+                    $('<td>').text(item.receiverMobileNo),
+                    $('<td>').text(item.receiverAddress)
+                );
+                tbody.append(row);
+            });
+
+            $('#resultsTable').show();
+            $('#noResults').hide();
+        }
+
+        // Event handlers
+        $('#searchBtn').click(searchParcel);
+
+        $('#searchInput').keypress(function(e) {
+            if (e.which === 13) { // Enter key
+                searchParcel();
+            }
+        });
+    });
+</script>
+</body>
+</html>

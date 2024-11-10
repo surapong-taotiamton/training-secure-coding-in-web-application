@@ -6,9 +6,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
 
+@FieldNameConstants
 @Accessors(chain = true)
 @Data
 @Entity

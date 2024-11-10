@@ -41,6 +41,15 @@ public class ParcelSpec {
     public static class SearchParcel {
         private String parcelTrackingNo;
         private String companyId;
+
+        private String senderName;
+        private String senderMobileNo;
+        private String senderAddress;
+
+        private String receiverName;
+        private String receiverMobileNo;
+        private String receiverAddress;
+
     }
 
 }

@@ -122,7 +122,7 @@
         function loadCompanyData() {
 
             const companyId = Cookies.get('companyId');
-            let url = "/vulnerability-company-info/" + companyId;
+            let url = "/company-info/" + companyId;
 
             // จำลองการดึงข้อมูลจาก API
             $.ajax({
@@ -153,7 +153,7 @@
             };
 
             const companyId = Cookies.get('companyId');
-            let url = "/vulnerability-company-info/" + companyId;
+            let url = "/company-info/" + companyId;
 
 
             // จำลองการส่งข้อมูลไป API
