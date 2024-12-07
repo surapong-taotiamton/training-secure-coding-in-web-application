@@ -17,3 +17,8 @@ Medium : https://surapong-taotiamton.medium.com/
 [Secure coding in Web application : ตอนที่ 1 : SQL Injection](https://youtu.be/onQOPXCutuM)
 
 [![](https://img.youtube.com/vi/onQOPXCutuM/0.jpg)](https://youtu.be/onQOPXCutuM)
+
+
+[Secure coding in Web application : ตอนที่ 2 : Broken Access Control : Modifying API request](https://youtu.be/VdR3Dezg8zY)
+
+[![](https://img.youtube.com/vi/VdR3Dezg8zY/0.jpg)](https://youtu.be/VdR3Dezg8zY)
