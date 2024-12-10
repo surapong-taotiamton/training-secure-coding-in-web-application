@@ -121,8 +121,7 @@
 
         function loadCompanyData() {
 
-            const companyId = Cookies.get('companyId');
-            let url = "/company-info/" + companyId;
+            let url = "/company-info"
 
             // จำลองการดึงข้อมูลจาก API
             $.ajax({
@@ -152,7 +151,7 @@
                 countUseParcel: $('#countUseParcel').val()
             };
 
-            const companyId = Cookies.get('companyId');
+            const companyId = formData.companyId;
             let url = "/company-info/" + companyId;
 
 

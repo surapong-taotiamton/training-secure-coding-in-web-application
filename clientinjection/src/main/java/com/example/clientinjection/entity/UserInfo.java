@@ -20,4 +20,5 @@ public class UserInfo {
     private String firstname;
     private String lastname;
     private String companyId;
+    private String accessToken;
 }

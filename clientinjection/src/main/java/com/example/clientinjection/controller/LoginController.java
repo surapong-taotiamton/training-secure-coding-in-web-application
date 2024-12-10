@@ -3,6 +3,8 @@ package com.example.clientinjection.controller;
 import com.example.clientinjection.controller.dto.LoginControllerDto;
 import com.example.clientinjection.entity.UserInfo;
 import com.example.clientinjection.repository.UserInfoRepository;
+import com.example.clientinjection.service.AuthenticationService;
+import com.example.clientinjection.service.spec.AuthenticationServiceSpec;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -21,61 +25,60 @@ public class LoginController {
 
     private final UserInfoRepository userInfoRepository;
 
-    @PostMapping("/login")
-    public String login(
-            @ModelAttribute LoginControllerDto.LoginRequest request, HttpServletResponse response) {
-
-        Optional<UserInfo> userInfoOptional  = userInfoRepository.findOneByUsername(request.getUsername());
-
-        if (userInfoOptional.isEmpty()) {
-            log.info("Case not found username");
-            return "error.html";
-        } else {
-            if ( userInfoOptional.get().getPassword().equals(request.getPassword()) ) {
-
-                Cookie usernameCookie = new Cookie("username", userInfoOptional.get().getUsername());
-                Cookie companyIdCookie = new Cookie("companyId", userInfoOptional.get().getCompanyId());
-
-                response.addCookie(usernameCookie);
-                response.addCookie(companyIdCookie);
-                return "redirect:/search-parcel";
-            } else {
-                return "error.html";
-            }
-        }
-
-    }
+    private final AuthenticationService authenticationService;
 
     @PostMapping("/login-route/{routeTo}")
     public String loginAndRoute(
             @PathVariable String routeTo,
             @ModelAttribute LoginControllerDto.LoginRequest request, HttpServletResponse response
     ) {
+        List<String> allowRouteTo = Arrays.asList("company-info", "search-parcel-problem");
+
+        if (!allowRouteTo.contains(routeTo)) {
+            log.info("Case routeTo is not in allow list");
+            throw new IllegalArgumentException("Not found route");
+        }
+
         return loginAndReturn(request, routeTo, response);
     }
+
+
 
     public String loginAndReturn(LoginControllerDto.LoginRequest request, String routeTo, HttpServletResponse response) {
 
         log.info("routeTo : {}", routeTo);
 
-        Optional<UserInfo> userInfoOptional  = userInfoRepository.findOneByUsername(request.getUsername());
+        AuthenticationServiceSpec.VerifyCredentialRequest verifyCredentialRequest = new AuthenticationServiceSpec.VerifyCredentialRequest()
+                .setUsername(request.getUsername())
+                .setPassword(request.getPassword());
 
-        if (userInfoOptional.isEmpty()) {
-            log.info("Case not found username");
-            return "error.html";
-        } else {
-            if ( userInfoOptional.get().getPassword().equals(request.getPassword()) ) {
+        AuthenticationServiceSpec.VerifyCredentialResponse verifyCredentialResponse = authenticationService.verifyCredential(verifyCredentialRequest);
 
-                Cookie usernameCookie = new Cookie("username", userInfoOptional.get().getUsername());
-                Cookie companyIdCookie = new Cookie("companyId", userInfoOptional.get().getCompanyId());
-
-                response.addCookie(usernameCookie);
-                response.addCookie(companyIdCookie);
-                return routeTo;
-            } else {
-                return "error.html";
-            }
+        if (!verifyCredentialResponse.isSuccess()) {
+            log.info("Case verify error");
+            throw new IllegalArgumentException("Incorrect credential");
         }
+
+        log.info("Case verify credential success");
+        String accessToken = authenticationService.createAndSaveAccessToken(verifyCredentialResponse.getUserId());
+
+        log.debug("Create accessToken success : {}", accessToken);
+
+        Cookie userIdCookie = new Cookie("userId", verifyCredentialResponse.getUserId());
+        userIdCookie.setPath("/");
+        userIdCookie.setMaxAge(7 * 24 * 60 * 60);
+
+        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(7 * 24 * 60 * 60);
+
+        response.addCookie(userIdCookie);
+        response.addCookie(accessTokenCookie);
+
+        log.debug("Set cookie complete");
+
+        return routeTo;
+
     }
 
 }
