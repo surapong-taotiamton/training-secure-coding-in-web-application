@@ -3,11 +3,10 @@ package com.example.clientinjection.service;
 import com.example.clientinjection.entity.UserInfo;
 import com.example.clientinjection.repository.UserInfoRepository;
 import com.example.clientinjection.service.spec.AuthenticationServiceSpec;
-import jakarta.servlet.http.Cookie;
+import com.example.clientinjection.util.HashUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -32,8 +31,15 @@ public class BasicAuthenticationService implements AuthenticationService {
             return new AuthenticationServiceSpec.VerifyCredentialResponse()
                     .setSuccess(false);
         } else {
-            if ( userInfoInDb.get().getPassword().equals(request.getPassword()) ) {
 
+            String salt = userInfoInDb.get().getPassword().substring(0, 15);
+            log.info("Salt is : {}", salt);
+            String hashFromRequest = HashUtil.hashPassword(salt, request.getPassword());
+
+            log.info("Hash from salt  + password : {}", hashFromRequest);
+            log.info("salt + hashFromRequest : {}", salt + hashFromRequest);
+
+            if ( userInfoInDb.get().getPassword().equals( salt + hashFromRequest ) ) {
                 return new AuthenticationServiceSpec.VerifyCredentialResponse()
                         .setSuccess(true)
                         .setUserId(userInfoInDb.get().getUserId());
@@ -41,6 +47,7 @@ public class BasicAuthenticationService implements AuthenticationService {
                 return new AuthenticationServiceSpec.VerifyCredentialResponse()
                         .setSuccess(false);
             }
+
         }
     }
 
